@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>Anonimizzatore Dati Sensibili (No AI)</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/shared.css">
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="site-brand" href="index.html">
+                <span class="site-brand-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></span>
+                <span class="site-brand-name" data-i18n="siteName">Data Anonymization Toolkit</span>
+            </a>
+            <nav class="site-nav" data-i18n-aria="navLabel" aria-label="Navigazione principale">
+                <a href="index.html" data-i18n="navHome">Home</a>
+                <a href="sheets.html" data-i18n="navSheets">Fogli Excel</a>
+                <a href="text.html" data-i18n="navText" aria-current="page">Testo</a>
+            </nav>
+            <div class="site-lang">
+                <button type="button" id="lang-it" class="lang-btn">IT</button>
+                <span class="lang-sep" aria-hidden="true">|</span>
+                <button type="button" id="lang-en" class="lang-btn">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Header & Nav -->
+    <header class="bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-4">
+            <h1 class="text-xl font-bold text-slate-900" data-i18n="title">Anonimizzatore Dati Sensibili</h1>
+            <p class="text-xs text-slate-500" data-i18n="subtitle">100% Locale • Crittografia AES-256 (No AI)</p>
+        </div>
+        <!-- Tabs -->
+        <div class="max-w-6xl mx-auto px-4 flex gap-4 mt-2">
+            <button id="tab-anon" class="px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-semibold transition-colors" data-i18n="tabAnon">1. Anonimizza</button>
+            <button id="tab-deanon" class="px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold transition-colors" data-i18n="tabDeanon">2. De-Anonimizza</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-8 relative">
+
+        <!-- ================= VISTA ANONIMIZZAZIONE ================= -->
+        <div id="view-anon" class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <!-- Sidebar: Regole -->
+            <aside class="md:col-span-4 bg-white rounded-xl shadow-sm border border-slate-200 p-5 h-fit">
+                <h2 class="text-lg font-semibold mb-4 border-b pb-2" data-i18n="settingsTitle">Impostazioni</h2>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold mb-1" data-i18n="pwdLabel">Password di Crittografia <span class="text-red-500">*</span></label>
+                    <p class="text-xs text-slate-500 mb-2" data-i18n="pwdDesc">Necessaria per creare la chiave cifrata di ripristino.</p>
+                    <input type="password" id="encrypt-password" class="w-full p-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500" data-i18n-placeholder="pwdPlaceholder" placeholder="Crea una password sicura">
+                </div>
+
+                <h3 class="text-sm font-semibold mb-3 border-t pt-4" data-i18n="dataToHide">Dati da Oscurare</h3>
+                <div class="space-y-3" id="rules-container">
+                    <!-- Checkbox generati dinamicamente via JS -->
+                </div>
+
+                <div class="mt-6 border-t border-slate-200 pt-4">
+                    <h3 class="text-sm font-semibold mb-2" data-i18n="customWordsLabel">Parole Specifiche (Opzionale)</h3>
+                    <textarea id="custom-words" rows="2" class="w-full p-2 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" data-i18n-placeholder="customWordsPlaceholder" placeholder="Es: Mario Rossi, Progetto X..."></textarea>
+                </div>
+
+                <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div class="flex gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-xs text-yellow-700" data-i18n="infoBox">
+                            L'elaborazione è 100% locale. I dati originali vengono cifrati e inseriti <strong>direttamente nel testo</strong> (es. <span class="font-mono">[ENCv1...]</span>). Non serve salvare nessun file extra, ti basta solo ricordare la password!
+                        </p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Area di Lavoro -->
+            <section class="md:col-span-8 flex flex-col gap-6">
+                <!-- Input Area (Testo o File) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-800 mb-3" data-i18n="step1Anon">1. Inserisci il testo o carica un file</h3>
+
+                    <textarea id="anon-input-text" class="w-full h-32 p-3 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 resize-none mb-4" data-i18n-placeholder="anonInputPlaceholder" placeholder="Incolla qui il testo da anonimizzare..."></textarea>
+
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider" data-i18n="or">Oppure</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
+                    </div>
+
+                    <div id="anon-drop-area" class="file-drop-area bg-slate-50 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer text-center group">
+                        <input type="file" id="anon-file-input" class="hidden" accept=".txt,.pdf,.docx" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 group-hover:text-blue-500 mb-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                        <h3 class="text-sm font-semibold text-slate-600" data-i18n="dropText">Trascina un file (.txt, .docx, .pdf) o clicca</h3>
+                        <p id="anon-file-name-display" class="text-xs font-medium text-blue-600 mt-2 hidden"></p>
+                    </div>
+
+                    <button id="btn-run-anon" class="w-full mt-6 py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition-colors shadow-sm" data-i18n="btnRunAnon">
+                        Esegui Anonimizzazione
+                    </button>
+                </div>
+
+                <!-- Finestra Risultati -->
+                <div id="result-area" class="bg-white rounded-xl shadow-sm border border-slate-200 p-0 flex flex-col hidden flex-grow" style="min-height: 300px;">
+                    <div class="border-b border-slate-200 p-4 flex justify-between items-center bg-slate-50 rounded-t-xl flex-wrap gap-2">
+                        <h3 class="font-semibold text-slate-800" data-i18n="step2Anon">2. Testo Oscurato</h3>
+                        <div class="flex gap-2">
+                            <button id="btn-copy" class="text-sm px-3 py-1.5 bg-white border border-slate-300 rounded hover:bg-slate-100 transition-colors flex items-center gap-1 shadow-sm">
+                                <span data-i18n="btnCopy">Copia</span>
+                            </button>
+                            <button id="btn-download" class="text-sm px-3 py-1.5 bg-white border border-slate-300 rounded hover:bg-slate-100 transition-colors md:flex items-center gap-1 shadow-sm hidden">
+                                <span data-i18n="btnDownload">Scarica TXT</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4 flex-grow flex flex-col">
+                        <textarea id="output-text" class="w-full h-full flex-grow p-4 border border-slate-200 rounded bg-slate-50 text-slate-700 focus:outline-none resize-none font-mono text-sm leading-relaxed" readonly></textarea>
+                    </div>
+                    <div class="p-4 bg-blue-50 border-t border-blue-100 rounded-b-xl text-sm text-blue-800" data-i18n="nextStepAnon">
+                        <strong>Passo successivo:</strong> Fai elaborare questo testo all'AI assicurandoti di dirle di <strong>non modificare</strong> le stringhe che iniziano con <code>[ENCv1</code>.
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= VISTA DE-ANONIMIZZAZIONE ================= -->
+        <div id="view-deanon" class="hidden max-w-4xl mx-auto flex flex-col gap-6">
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h2 class="text-lg font-semibold mb-2" data-i18n="restoreTitle">Ripristino Dati Originali</h2>
+                <p class="text-sm text-slate-600 mb-6" data-i18n="restoreDesc">Incolla il testo elaborato dall'AI (oppure carica il file che l'AI ti ha generato). Il sistema cercherà tutti i blocchi <span class="font-mono">[ENCv1...]</span> e li decripterà al volo usando la tua password. I vecchi blocchi legacy <span class="font-mono">[ENC::...]</span> non vengono riconosciuti.</p>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-1" data-i18n="pwdLabel">Password di Crittografia <span class="text-red-500">*</span></label>
+                    <input type="password" id="decrypt-password" class="w-full p-2 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500" data-i18n-placeholder="decryptPwdPlaceholder" placeholder="Password usata in fase 1">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-1" data-i18n="restoreInputLabel">Testo Elaborato dall'AI <span class="text-red-500">*</span></label>
+                    <textarea id="restore-input" class="w-full h-32 p-3 border border-slate-300 rounded text-sm focus:ring-2 focus:ring-blue-500 resize-none mb-4" data-i18n-placeholder="restoreInputPlaceholder" placeholder="Incolla qui il testo contenente i segnaposto [ENCv1...] ..."></textarea>
+
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider" data-i18n="or">Oppure</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
+                    </div>
+
+                    <div id="deanon-drop-area" class="file-drop-area bg-slate-50 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer text-center group">
+                        <input type="file" id="deanon-file-input" class="hidden" accept=".txt,.pdf,.docx" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 group-hover:text-blue-500 mb-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                        <h3 class="text-sm font-semibold text-slate-600" data-i18n="dropText">Trascina un file (.txt, .docx, .pdf) o clicca</h3>
+                        <p id="deanon-file-name-display" class="text-xs font-medium text-blue-600 mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <button id="btn-restore" class="w-full py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg>
+                    <span data-i18n="btnRestore">Decripta e Ripristina Testo</span>
+                </button>
+            </div>
+
+            <!-- Risultato Ripristino -->
+            <div id="restore-result-area" class="bg-white rounded-xl shadow-sm border border-slate-200 p-0 hidden flex-col">
+                <div class="border-b border-slate-200 p-4 flex justify-between items-center bg-green-50 rounded-t-xl">
+                    <h3 class="font-semibold text-green-800" data-i18n="restoredTitle">Testo Ripristinato</h3>
+                    <button id="btn-copy-restored" class="text-sm px-3 py-1.5 bg-white border border-green-300 text-green-700 rounded hover:bg-green-100 transition-colors flex items-center gap-1 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        <span data-i18n="btnCopy">Copia Testo</span>
+                    </button>
+                </div>
+                <div class="p-4 flex-grow flex flex-col">
+                    <textarea id="restore-output" class="w-full h-64 p-4 border border-slate-200 rounded bg-white text-slate-800 focus:outline-none resize-none font-mono text-sm leading-relaxed" readonly></textarea>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden absolute inset-0 bg-white bg-opacity-90 z-10 flex flex-col items-center justify-center rounded-xl">
+            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-slate-600 font-medium" id="loading-text" data-i18n="loading">Elaborazione in corso...</p>
+        </div>
+
+    </main>
+
+    <!-- Modal Avvisi -->
+    <div id="alert-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4">
+            <h3 class="text-lg font-bold text-slate-900 mb-2" id="alert-title" data-i18n="alertTitle">Avviso</h3>
+            <p class="text-slate-600 mb-6" id="alert-message">Messaggio.</p>
+            <div class="flex justify-end">
+                <button type="button" id="alert-close" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" data-i18n="alertOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/shared.js"></script>
+    <script src="assets/vendor/mammoth.browser.min.js"></script>
+    <script src="assets/vendor/pdf.min.js"></script>
+    <script src="assets/text.js"></script>
+</body>
+</html>

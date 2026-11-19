@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>Anonimizzatore Dati Excel</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/shared.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="site-brand" href="index.html">
+                <span class="site-brand-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></span>
+                <span class="site-brand-name" data-i18n="siteName">Data Anonymization Toolkit</span>
+            </a>
+            <nav class="site-nav" data-i18n-aria="navLabel" aria-label="Navigazione principale">
+                <a href="index.html" data-i18n="navHome">Home</a>
+                <a href="sheets.html" data-i18n="navSheets" aria-current="page">Fogli Excel</a>
+                <a href="text.html" data-i18n="navText">Testo</a>
+            </nav>
+            <div class="site-lang">
+                <button type="button" id="lang-it" class="lang-btn">IT</button>
+                <span class="lang-sep" aria-hidden="true">|</span>
+                <button type="button" id="lang-en" class="lang-btn">EN</button>
+            </div>
+        </div>
+    </header>
+    <div class="page-shell">
+
+    <div class="max-w-4xl w-full bg-white rounded-2xl shadow-xl p-5 sm:p-8 relative">
+
+        <!-- Header -->
+        <div class="text-center mb-5 mt-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2" data-i18n="title">Anonimizzatore Dati Excel</h1>
+            <p class="text-gray-500 text-sm" data-i18n="subtitle">Nessuna AI. Nessun server. I dati rimangono nel tuo browser.</p>
+            <p class="inline-flex items-center mt-3 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">
+                <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <span data-i18n="localBadge">Elaborazione 100% locale nel browser: nessun caricamento su server</span>
+            </p>
+        </div>
+
+        <!-- Workflow indicator -->
+        <ol id="workflow-steps" class="flex flex-wrap justify-center gap-x-3 gap-y-1 mb-6 text-xs text-gray-500" data-i18n-aria="workflowLabel">
+            <li class="wf-step" data-step="1"><span data-i18n="wf1">1. Carica</span></li>
+            <li class="wf-step" data-step="2"><span data-i18n="wf2">2. Ispeziona</span></li>
+            <li class="wf-step" data-step="3"><span data-i18n="wf3">3. Colonne</span></li>
+            <li class="wf-step" data-step="4"><span data-i18n="wf4">4. Configura</span></li>
+            <li class="wf-step" data-step="5"><span data-i18n="wf5">5. Anteprima</span></li>
+            <li class="wf-step" data-step="6"><span data-i18n="wf6">6. Esporta</span></li>
+        </ol>
+
+        <!-- Status area (errors / messages) -->
+        <div id="status-area" class="hidden mb-4 border rounded-lg p-3 text-sm" role="status" aria-live="polite"></div>
+
+        <!-- Mode Toggle -->
+        <div class="flex justify-center space-x-2 mb-8 bg-gray-100 p-1 rounded-lg max-w-sm mx-auto">
+            <button type="button" id="tab-anon" class="flex-1 py-2 px-4 rounded-md bg-white shadow text-sm font-semibold text-blue-600 transition-all" data-i18n="tabAnon">Anonimizza</button>
+            <button type="button" id="tab-deanon" class="flex-1 py-2 px-4 rounded-md text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all" data-i18n="tabDeanon">De-anonimizza</button>
+        </div>
+
+        <!-- Step 1: Upload File -->
+        <section id="step-1" class="mb-6">
+            <label id="step-1-label" class="block text-sm font-medium text-gray-700 mb-2" data-i18n="step1Anon">1. Carica il tuo file Excel originale (.xlsx, .xls, .csv)</label>
+            <div class="flex items-center justify-center w-full">
+                <label for="dropzone-file" id="dropzone" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 border-blue-300 transition-colors">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-10 h-10 mb-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="mb-2 text-sm text-gray-500">
+                            <span class="font-semibold" data-i18n="uploadText">Clicca per caricare</span><span data-i18n="uploadOr"> o trascina il file qui</span>
+                        </p>
+                        <p class="text-xs text-gray-500" id="file-name-display" data-i18n="noFile">Nessun file selezionato</p>
+                    </div>
+                    <input id="dropzone-file" type="file" class="hidden" accept=".xlsx,.xlsm,.xls,.csv" />
+                </label>
+            </div>
+
+            <!-- CSV options -->
+            <div id="csv-options" class="hidden mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3">
+                <div>
+                    <label for="csv-delimiter" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="csvDelimiter">Delimitatore di colonne</label>
+                    <select id="csv-delimiter" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white text-gray-700">
+                        <option value="," data-i18n="delimComma">Virgola (,)</option>
+                        <option value=";" data-i18n="delimSemicolon">Punto e virgola (;)</option>
+                        <option value="tab" data-i18n="delimTab">Tabulatore</option>
+                        <option value="|" data-i18n="delimPipe">Barra verticale (|)</option>
+                    </select>
+                    <p id="csv-delimiter-hint" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+                <div>
+                    <label for="csv-encoding" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="csvEncoding">Codifica caratteri</label>
+                    <select id="csv-encoding" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white text-gray-700">
+                        <option value="utf-8" data-i18n="encUtf8">UTF-8</option>
+                        <option value="windows-1252" data-i18n="encW1252">Windows-1252</option>
+                        <option value="iso-8859-1" data-i18n="encLatin1">ISO-8859-1 (Latin-1)</option>
+                        <option value="utf-16le" data-i18n="encUtf16le">UTF-16 LE</option>
+                        <option value="utf-16be" data-i18n="encUtf16be">UTF-16 BE</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1" data-i18n="csvEncodingHint">Il BOM viene rilevato automaticamente.</p>
+                </div>
+                <div class="sm:col-span-3 border-t border-gray-200 pt-3">
+                    <label class="flex items-start text-xs text-gray-600 cursor-pointer">
+                        <input type="checkbox" id="csv-types" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2 mt-0.5">
+                        <span><span class="font-semibold text-gray-700" data-i18n="csvTypes">Interpreta i campi numerici come numeri</span>
+                        <span class="block text-gray-500" data-i18n="csvTypesHint">Utile per la generalizzazione dei valori numerici nei CSV. I campi con zeri iniziali (es. 007) restano testo; l'interpretazione non viene applicata alle intestazioni.</span></span>
+                    </label>
+                </div>
+                <div>
+                    <span class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="csvExportLabel">Esportazione CSV</span>
+                    <label class="flex items-center text-xs text-gray-600 mb-1">
+                        <input type="checkbox" id="csv-bom" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2" checked>
+                        <span data-i18n="csvBom">Aggiungi BOM UTF-8 (consigliato per Excel)</span>
+                    </label>
+                    <p class="text-xs text-gray-500" data-i18n="csvNote">Il file CSV resta un CSV: non viene convertito in cartella Excel.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 2: Inspect -->
+        <section id="step-2" class="hidden opacity-0 transition-opacity duration-500 mb-6">
+            <div class="flex items-center justify-between mb-2 gap-3">
+                <label class="block text-sm font-medium text-gray-700" data-i18n="step2Title">2. Ispeziona il file</label>
+                <button type="button" class="js-reset text-xs font-medium text-gray-500 hover:text-red-600 underline transition-colors" data-i18n="btnReset">Azzera sessione</button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 text-center">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-0">
+                    <div class="text-xs text-gray-500" data-i18n="infoType">Formato</div>
+                    <div id="info-type" class="text-sm font-semibold text-gray-800 truncate">-</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-0">
+                    <div class="text-xs text-gray-500" data-i18n="infoSheets">Fogli</div>
+                    <div id="info-sheets" class="text-sm font-semibold text-gray-800 truncate">-</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-0">
+                    <div class="text-xs text-gray-500" data-i18n="infoRows">Righe dati</div>
+                    <div id="info-rows" class="text-sm font-semibold text-gray-800 truncate">-</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-0">
+                    <div class="text-xs text-gray-500" data-i18n="infoCols">Colonne</div>
+                    <div id="info-cols" class="text-sm font-semibold text-gray-800 truncate">-</div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="flex items-center justify-between mb-1 gap-3">
+                    <span class="text-sm font-medium text-gray-700" data-i18n="sheetsTitle">Fogli di calcolo da elaborare</span>
+                    <label class="flex items-center text-xs text-gray-600 cursor-pointer">
+                        <input type="checkbox" id="sheets-all" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-1.5" checked>
+                        <span data-i18n="selectAllSheets">Seleziona tutti</span>
+                    </label>
+                </div>
+                <div id="sheets-container" class="border border-gray-200 rounded-lg p-2 max-h-44 overflow-y-auto custom-scrollbar bg-gray-50 space-y-1"></div>
+                <p class="text-xs text-gray-500 mt-1" data-i18n="sheetsHint">Nessun foglio viene scartato in modo automatico: quelli deselezionati restano invariati nel file di output.</p>
+            </div>
+
+            <div id="format-warnings" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-2">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-xs text-yellow-800" id="format-warnings-text"></p>
+            </div>
+        </section>
+
+        <!-- Step 3: Column selection -->
+        <section id="step-3" class="hidden mb-6">
+            <label id="step-3-label" class="block text-sm font-medium text-gray-700 mb-1" data-i18n="step3Title">3. Seleziona le colonne da anonimizzare</label>
+            <p class="text-xs text-gray-500 mb-2" data-i18n="headerHint">La prima riga di ogni foglio è considerata intestazione e non viene trasformata. Le colonne senza intestazione o con nomi duplicati restano identificabili tramite il loro numero.</p>
+
+            <div class="anon-only bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-2 mb-3">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-xs text-yellow-800" data-i18n="reidentWarning">Un campo non è automaticamente sicuro da conservare solo perché non identifica direttamente una persona: combinazioni di attributi (anche non sensibili) possono permettere la re-identificazione.</p>
+            </div>
+
+            <div id="columns-container" class="border border-gray-200 rounded-lg p-2 max-h-80 overflow-y-auto custom-scrollbar bg-gray-50 space-y-3"></div>
+        </section>
+
+        <!-- Step 4: Method + options -->
+        <section id="step-4" class="hidden mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div class="anon-only">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="methodTitle">4. Metodo predefinito per le colonne selezionate</label>
+                    <div id="methods-container" class="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <label class="flex items-start">
+                            <input type="radio" name="anon-method" value="mask-full" class="mt-1 text-blue-600 focus:ring-blue-500" checked>
+                            <span class="ml-2">
+                                <span class="block text-sm font-medium text-gray-800" data-i18n="methodFull">Oscuramento Totale</span>
+                                <span class="block text-xs text-gray-500" data-i18n="methodFullDesc">Sostituisce tutto con la stringa di mascheratura (es. Mario -> ***)</span>
+                            </span>
+                        </label>
+                        <label class="flex items-start">
+                            <input type="radio" name="anon-method" value="mask-partial" class="mt-1 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2">
+                                <span class="block text-sm font-medium text-gray-800" data-i18n="methodPartial">Oscuramento Parziale</span>
+                                <span class="block text-xs text-gray-500" data-i18n="methodPartialDesc">Mantiene solo le parti che hai configurato (es. Mario -> M***o)</span>
+                            </span>
+                        </label>
+                        <label class="flex items-start">
+                            <input type="radio" name="anon-method" value="random-id" class="mt-1 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2">
+                                <span class="block text-sm font-medium text-gray-800" data-i18n="methodRandom">Pseudonimo (ID costante)</span>
+                                <span class="block text-xs text-gray-500" data-i18n="methodRandomDesc">Valori uguali nella stessa colonna ricevono lo stesso ID; valori diversi ID diversi. Non è anonimato.</span>
+                            </span>
+                        </label>
+                        <label class="flex items-start">
+                            <input type="radio" name="anon-method" value="generalize" class="mt-1 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2">
+                                <span class="block text-sm font-medium text-gray-800" data-i18n="methodGeneralize">Generalizzazione numerica</span>
+                                <span class="block text-xs text-gray-500" data-i18n="methodGeneralizeDesc">Trasforma i numeri esatti in intervalli (es. 34 -> 30-39), mantenendo utilità analitica.</span>
+                            </span>
+                        </label>
+                        <label class="flex items-start">
+                            <input type="radio" name="anon-method" value="encrypt" class="mt-1 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-2">
+                                <span class="block text-sm font-medium text-gray-800" data-i18n="methodEncrypt">Cifratura reversibile (AES-GCM)</span>
+                                <span class="block text-xs text-gray-500" data-i18n="methodEncryptDesc">Usa una password. La decifratura è autenticata: password errata o contenuto modificato produce un errore. È pseudonimizzazione, non anonimizzazione.</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="anon-only">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="optionsTitle">Opzioni di trasformazione (non usate con la cifratura)</label>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="opt-mask" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="optMaskString">Stringa di mascheratura</label>
+                                <input type="text" id="opt-mask" value="***" maxlength="20" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="opt-pseudo-format" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="optPseudoFormat">Formato pseudonimo</label>
+                                <select id="opt-pseudo-format" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white text-gray-700">
+                                    <option value="seq" data-i18n="pseudoSeq">Sequenziale: ID_000001</option>
+                                    <option value="token" data-i18n="pseudoToken">Token casuale: ID_A7K2M9XQ4Z</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="opt-keep-start" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="optKeepStart">Parziale: mantieni inizio (n. caratteri)</label>
+                                <input type="number" id="opt-keep-start" value="1" min="0" max="20" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="opt-keep-end" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="optKeepEnd">Parziale: mantieni fine (n. caratteri)</label>
+                                <input type="number" id="opt-keep-end" value="1" min="0" max="20" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="opt-gen-bin" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="optGenBin">Generalizza: larghezza intervallo</label>
+                                <input type="number" id="opt-gen-bin" value="10" min="1" max="1000000" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="opt-gen-output" class="block text-xs font-semibold text-gray-700 mb-1" data-i18n="optGenOutput">Generalizza: formato output</label>
+                                <select id="opt-gen-output" class="w-full border border-gray-300 rounded-md p-2 text-sm bg-white text-gray-700">
+                                    <option value="label" data-i18n="genLabel">Intervallo testuale (30-39)</option>
+                                    <option value="lower" data-i18n="genLower">Estremo inferiore numerico (30)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500" data-i18n="optionsHint">Queste opzioni valgono solo per i metodi oscuramento, pseudonimizzazione e generalizzazione. Con la cifratura reversibile vengono ignorate: conta solo la password. È comunque possibile assegnare metodi diversi colonna per colonna nell'elenco precedente.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password (encrypt / de-anon) -->
+            <div id="password-container" class="hidden mb-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <label class="block text-sm font-medium text-blue-800 mb-1" for="crypto-password" data-i18n="pwdLabel">Password di Sicurezza</label>
+                <input type="password" id="crypto-password" data-i18n-placeholder="pwdPlaceholder" class="w-full border border-blue-300 rounded-md p-2 bg-white focus:ring-blue-500 focus:border-blue-500" placeholder="Inserisci password..." autocomplete="new-password">
+                <p class="text-xs text-blue-700 mt-1" data-i18n="pwdDesc">Memorizza la password, ti servirà per decifrare i dati! La password non viene salvata in alcun modo: resta solo in memoria durante l'operazione e viene azzerata al termine.</p>
+                <p class="text-xs text-blue-600 mt-1" data-i18n="pwdCryptoNote">Dettagli: AES-256-GCM, chiave derivata con PBKDF2-HMAC-SHA-256 (600.000 iterazioni), sale casuale e IV unico per ogni valore.</p>
+                <p id="webcrypto-warning" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2 mt-2" data-i18n="webcryptoMissing">La Web Crypto API non è disponibile in questo browser: la cifratura è disattivata per non ricorrere a crittografia più debole. Apri la pagina in un browser moderno.</p>
+            </div>
+
+            <!-- Irreversible warning -->
+            <div id="irreversible-warning" class="hidden mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex gap-2">
+                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p class="text-xs text-yellow-800" data-i18n="irreversibleWarning">Oscuramento, pseudonimizzazione e generalizzazione sono irreversibili: senza una copia del file originale non sarà possibile ripristinare i valori. La cifratura è l'unico metodo reversibile.</p>
+            </div>
+
+            <!-- Summary -->
+            <div id="summary-box" class="mb-4 border border-gray-200 rounded-lg p-3 bg-white">
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2" data-i18n="summaryTitle">Riepilogo della selezione</div>
+                <div id="summary-content" class="text-sm text-gray-700 space-y-1"></div>
+            </div>
+
+            <!-- Action Button -->
+            <button type="button" id="process-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-colors flex justify-center items-center mb-4 disabled:opacity-60">
+                <span data-i18n="btnPreviewAnon">Genera Anteprima</span>
+            </button>
+
+            <!-- Progress -->
+            <div id="progress-wrap" class="hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                    <div id="progress-fill" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progress-label" class="text-xs text-gray-500 mt-1 text-center" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <!-- Step 5: Preview -->
+        <section id="step-5" class="hidden mb-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 flex-1" data-i18n="previewTitle">Anteprima Dati (Prime righe)</h3>
+                <div id="preview-tabs" class="flex flex-wrap gap-1 pb-1"></div>
+            </div>
+            <div class="overflow-x-auto border border-gray-200 rounded-lg bg-white custom-scrollbar max-h-64">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0" id="preview-thead"></thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="preview-tbody"></tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-400 mt-1" data-i18n="previewLocalHint">L'anteprima viene generata esclusivamente in memoria nel browser.</p>
+
+            <!-- Stats -->
+            <div id="stats-box" class="hidden mt-3 border border-gray-200 rounded-lg bg-gray-50 p-3">
+                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1" data-i18n="statsTitle">Dettaglio elaborazione</div>
+                <ul id="stats-content" class="text-xs text-gray-700 space-y-0.5 list-disc list-inside"></ul>
+            </div>
+
+            <!-- Export -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                <button type="button" id="download-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-colors flex justify-center items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span data-i18n="btnDownloadAnon">Scarica File Anonimizzato</span>
+                </button>
+                <button type="button" class="js-reset w-full bg-white border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-gray-50 transition-colors flex justify-center items-center" data-i18n="btnResetSession">Azzera file e sessione</button>
+            </div>
+        </section>
+
+        <!-- Privacy notice -->
+        <details id="privacy-details" class="mt-8 border border-gray-200 rounded-lg bg-gray-50">
+            <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors" data-i18n="privacyTitle">Privacy e sicurezza (leggi prima di caricare dati sensibili)</summary>
+            <div class="px-4 pb-4 text-xs text-gray-600 space-y-3">
+                <ul class="list-disc list-inside space-y-1">
+                    <li data-i18n="privacy1">I file vengono letti ed elaborati esclusivamente nel browser, in locale.</li>
+                    <li data-i18n="privacy2">L'applicazione non carica deliberatamente i contenuti dei file su alcun server.</li>
+                    <li data-i18n="privacy3">Password e chiavi di cifratura non vengono trasmesse: la derivazione della chiave avviene con la Web Crypto API del browser.</li>
+                    <li data-i18n="privacy4">Questa versione standalone non dipende da CDN esterni, API, analytics o tracciamenti; la pagina include una Content Security Policy che blocca le richieste di rete.</li>
+                    <li data-i18n="privacy5">Per verificare in autonomia queste affermazioni, esamina il sorgente del file HTML e l'ambiente di distribuzione.</li>
+                </ul>
+                <div class="bg-white border border-gray-200 rounded p-3">
+                    <div class="font-semibold text-gray-700 mb-1" data-i18n="glossaryTitle">Differenze tra le trasformazioni</div>
+                    <p class="mb-1"><strong data-i18n="glossMaskTerm">Oscuramento (masking):</strong> <span data-i18n="glossMaskDef">sostituisce il valore con un segnaposto; è irreversibile e distrugge l'informazione.</span></p>
+                    <p class="mb-1"><strong data-i18n="glossPseudoTerm">Pseudonimizzazione:</strong> <span data-i18n="glossPseudoDef">sostituisce il valore con un identificativo costante o cifra reversibilmente con password: i dati restano collegabili all'originale e non sono anonimi.</span></p>
+                    <p class="mb-1"><strong data-i18n="glossEncryptTerm">Cifratura:</strong> <span data-i18n="glossEncryptDef">trasforma i dati in forma non leggibile senza la password (AES-GCM autenticato); è reversibile e quindi una forma di pseudonimizzazione.</span></p>
+                    <p><strong data-i18n="glossAnonTerm">Anonimizzazione:</strong> <span data-i18n="glossAnonDef">riduce il rischio di re-identificazione in modo irreversibile. Nessuno strumento automatico la garantisce da solo.</span></p>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded p-3 text-yellow-800">
+                    <p data-i18n="noGdpr">L'uso di questo strumento non rende automaticamente un dataset conforme al GDPR né garantisce l'anonimato: la valutazione del rischio resta responsabilità di chi elabora i dati.</p>
+                </div>
+                <div>
+                    <div class="font-semibold text-gray-700 mb-1" data-i18n="limitationsTitle">Limiti noti (formati e funzionalità)</div>
+                    <ul class="list-disc list-inside space-y-0.5">
+                        <li data-i18n="limit1">Il file di output viene rigenerato: valori, nomi e ordine dei fogli, fusioni di celle, larghezze di colonna e formati numerici sono conservati, ma grafici, pivot table, formattazione di celle (colori/font/bordi), commenti, convalida dati, formattazione condizionale e macro NON vengono preservati.</li>
+                        <li data-i18n="limit2">Le formule nelle colonne trasformate vengono sostituite dal relativo valore elaborato.</li>
+                        <li data-i18n="limit3">I file .xls vengono letti, ma l'output viene salvato in formato .xlsx.</li>
+                        <li data-i18n="limit4">I valori in formato legacy ENC:: (prodotti dalla versione precedente con CryptoJS) non sono decifrabili da questa versione: richiedono il precedente strumento.</li>
+                        <li data-i18n="limit5">CSV: sono supportati delimitatori semplici e valori tra virgolette con a capo; codifiche oltre UTF-8 dipendono dal supporto del browser.</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+    </div>
+
+    </div>
+    <script src="assets/shared.js"></script>
+    <script src="assets/vendor/xlsx.full.min.js"></script>
+    <script src="assets/sheets.js"></script>
+</body>
+</html>
